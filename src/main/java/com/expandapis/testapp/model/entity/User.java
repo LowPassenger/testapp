@@ -1,6 +1,6 @@
 package com.expandapis.testapp.model.entity;
 
-import com.expandapis.testapp.util.Constants;
+import com.expandapis.testapp.util.AppConstants;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +14,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.Set;
-import javax.management.relation.Role;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,12 +21,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "users")
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", unique = true, length = Constants.MAX_USERNAME_LENGTH, nullable = false)
+    @Column(name = "username", unique = true,
+            length = AppConstants.MAX_USERNAME_LENGTH,
+            nullable = false)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -38,7 +39,7 @@ public class UserEntity {
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<RoleEntity> roles;
+    private Set<Role> roles;
 
     @Override
     public boolean equals(Object o) {
@@ -49,7 +50,7 @@ public class UserEntity {
             return false;
         }
 
-        UserEntity user = (UserEntity) o;
+        User user = (User) o;
 
         if (!Objects.equals(id, user.id)) {
             return false;
@@ -74,10 +75,10 @@ public class UserEntity {
 
     @Override
     public String toString() {
-        return "UserEntity{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", encryptedPassword='" + "OK" + '\'' +
-                '}';
+        return "UserEntity{"
+                + "id=" + id
+                + ", username='" + username + '\''
+                + ", encryptedPassword='" + "OK" + '\''
+                + '}';
     }
 }

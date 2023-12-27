@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Table(name = "roles")
 @RequiredArgsConstructor
-public class RoleEntity {
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

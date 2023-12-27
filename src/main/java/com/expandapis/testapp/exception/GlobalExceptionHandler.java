@@ -20,7 +20,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
-
     @ExceptionHandler(TestTaskApiException.class)
     public ResponseEntity<ErrorDetails> handleBlogApiException(
             TestTaskApiException exception, WebRequest webRequest) {

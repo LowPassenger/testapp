@@ -1,7 +1,7 @@
 package com.expandapis.testapp.security;
 
-import com.expandapis.testapp.model.entity.RoleEntity;
-import com.expandapis.testapp.model.entity.UserEntity;
+import com.expandapis.testapp.model.entity.Role;
+import com.expandapis.testapp.model.entity.User;
 import com.expandapis.testapp.service.UserService;
 import java.util.Collection;
 import java.util.Set;
@@ -24,12 +24,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userService.getByUsername(username);
+        User user = userService.getByUsername(username);
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getEncryptedPassword(), mapRolesToAuthorities(user.getRoles()));
+                user.getUsername(),
+                user.getEncryptedPassword(),
+                mapRolesToAuthorities(user.getRoles()));
     }
 
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Set<RoleEntity> roles) {
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Set<Role> roles) {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();

@@ -1,6 +1,7 @@
 package com.expandapis.testapp.security.jwt;
 
 import com.expandapis.testapp.exception.TestTaskApiException;
+import com.expandapis.testapp.util.AppConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -10,33 +11,28 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
-    @Value("${app.security.jwt.token.secret-key:secretByApp}")
-    private String jwtSecret;
-    @Value("${app.security.jwt.token.life-time-milliseconds:43200000}")
-    private long validityJwtInMilliseconds;
-
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
         Date currentDate = new Date();
-        Date validityDate = new Date(currentDate.getTime() + validityJwtInMilliseconds);
+        Date validityDate = new Date(currentDate.getTime()
+                + AppConstants.JWT_TOKEN_LIFE_TIME_MILLISECONDS);
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(validityDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(SignatureAlgorithm.HS512, AppConstants.JWT_TOKEN_SECRET_KEY)
                 .compact();
     }
 
     public String getUsernameFromJwT(String token) {
         return Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(AppConstants.JWT_TOKEN_SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
@@ -44,7 +40,7 @@ public class JwtTokenProvider {
 
     public String getCredentialsFromJwT(String token) {
         return (String) Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(AppConstants.JWT_TOKEN_SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody()
                 .get("credentials");
@@ -52,7 +48,9 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jws<Claims> claimsJws = Jwts.parser()
+                    .setSigningKey(AppConstants.JWT_TOKEN_SECRET_KEY)
+                    .parseClaimsJws(token);
             return !claimsJws.getBody().getExpiration().before(new Date());
         } catch (SignatureException ex) {
             throw new TestTaskApiException(HttpStatus.BAD_REQUEST, "Invalid JWT signature");
