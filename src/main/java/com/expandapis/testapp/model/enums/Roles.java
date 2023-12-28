@@ -10,5 +10,5 @@ public enum Roles {
     ROLE_ADMIN("ADMIN"),
     ROLE_MODERATOR("MODERATOR");
 
-    private String roleName;
+    private final String roleName;
 }

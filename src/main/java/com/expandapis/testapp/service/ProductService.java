@@ -3,6 +3,7 @@ package com.expandapis.testapp.service;
 import com.expandapis.testapp.exception.ResourceNotFoundException;
 import com.expandapis.testapp.repository.ProductRepository;
 import com.expandapis.testapp.util.AppConstants;
+import com.expandapis.testapp.util.TableNameHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,30 +14,35 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
+    private final TableNameHolder tableNameHolder;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, TableNameHolder tableNameHolder) {
         this.productRepository = productRepository;
+        this.tableNameHolder = tableNameHolder;
     }
 
-    public void productHandler(Map<String, Object> payload) {
+    public boolean productHandler(Map<String, Object> payload) {
         productRepository.createTable(makeTableQuery(payload));
         log.info("Table {} was successfully created", payload.get(AppConstants.JSON_TABLE_KEY));
 
         List<String> recordsList = makeRecordsQuery(payload);
         if (!recordsList.isEmpty()) {
             recordsList.forEach(productRepository::saveProduct);
+            log.info("{} of {}(s) was added to database", recordsList.size(),
+                    AppConstants.JSON_RECORD_KEY);
+            return true;
         }
-        log.info("{} of {}(s) was added to database", recordsList.size(),
-                AppConstants.JSON_RECORD_KEY);
+        return false;
     }
 
     public List getAllProducts() {
-        String query = "SELECT * FROM " + AppConstants.JSON_RECORD_KEY;
+        String query = "SELECT * FROM " + tableNameHolder.getLastTableName();
         return productRepository.getAllProducts(query);
     }
 
     private String makeTableQuery(Map<String, Object> payload) {
         String tableName = payload.get(AppConstants.JSON_TABLE_KEY).toString();
+        tableNameHolder.setTableName(tableName);
         StringBuilder queryBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                 .append(tableName).append(" ( id INT PRIMARY KEY AUTO_INCREMENT, ");
 
@@ -45,7 +51,7 @@ public class ProductService {
 
         if (records.isEmpty()) {
             throw new ResourceNotFoundException(tableName, AppConstants.JSON_RECORD_KEY,
-                    "has 0 items!");
+                    " field has 0 items!");
         }
 
         Map<String, Object> exampleRecord = records.get(0);

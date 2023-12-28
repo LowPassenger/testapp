@@ -34,9 +34,10 @@ public class ProductController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        productService.productHandler(payload);
-        return new ResponseEntity<>("Trying to add records in the "
-                + payload.get(AppConstants.JSON_TABLE_KEY) + "table", HttpStatus.I_AM_A_TEAPOT);
+        return productService.productHandler(payload) ? new ResponseEntity<>(payload
+                .get(AppConstants.JSON_RECORD_KEY) + " was successfully added", HttpStatus.CREATED)
+                : new ResponseEntity<>("Something wrong, " + AppConstants.JSON_RECORD_KEY
+                + "were not added to the database!", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("all")
